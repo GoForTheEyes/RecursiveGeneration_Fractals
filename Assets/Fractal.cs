@@ -22,8 +22,7 @@ public class Fractal : MonoBehaviour {
         gameObject.AddComponent<MeshRenderer>().material = material;
         if (depth<maxDepth)
         {
-            new GameObject("Fractal Child").
-                AddComponent<Fractal>().Initialize(this);
+            StartCoroutine(CreateChildren());
         }
 	}
 	
@@ -32,7 +31,7 @@ public class Fractal : MonoBehaviour {
 		
 	}
 
-    private void Initialize (Fractal parent)
+    private void Initialize (Fractal parent, Vector3 direction, Quaternion orientation)
     {
         mesh = parent.mesh;
         material = parent.material;
@@ -44,9 +43,24 @@ public class Fractal : MonoBehaviour {
         transform.localScale = Vector3.one * childScale;
         //parent local size is 1, we then move another 1/2 of the new child
         //(because anchor is at the middle)
-        transform.localPosition = Vector3.up * (0.5f + 0.5f * childScale);
+        transform.localPosition = direction * (0.5f + 0.5f * childScale);
+        transform.localRotation = orientation;
 
 
+    }
+
+    //coroutine to pause creation
+    private IEnumerator CreateChildren ()
+    {
+        yield return new WaitForSeconds(0.5f);
+        new GameObject("Fractal Child").
+            AddComponent<Fractal>().Initialize(this, Vector3.up, Quaternion.identity);
+        yield return new WaitForSeconds(0.5f);
+        new GameObject("Fractal Child").
+            AddComponent<Fractal>().Initialize(this, Vector3.right, Quaternion.Euler(0f,0f,-90f));
+        yield return new WaitForSeconds(0.5f);
+        new GameObject("Fractal Child").
+            AddComponent<Fractal>().Initialize(this, Vector3.left, Quaternion.Euler(0f, 0f, 90f));
     }
 
 }
